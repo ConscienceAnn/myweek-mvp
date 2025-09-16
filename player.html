@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>🎬 Твоя неделя как...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        #videoPlayer {
+            max-width: 100%;
+            height: auto;
+            background: #000;
+            display: block;
+        }
+        #shareBtn, #restartBtn {
+            padding: 12px 24px;
+            margin: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        #shareBtn { background: #ff5e5b; color: white; }
+        #restartBtn { background: #4CAF50; color: white; }
+    </style>
+</head>
+<body>
+    <div id="playerContainer">
+        <video id="videoPlayer" playsinline></video>
+    </div>
+
+    <script>
+        const BASE_URL = "https://[USER].github.io/myweek-mvp/videos/";
+        // ⚠️ ЗАМЕНИ [USER] на свой GitHub username (сделаем на шаге 4)
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id') || 'test123';
+
+        // Для MVP — храним выборы прямо в URL (можно заменить на fetch позже)
+        const mood1 = urlParams.get('m1') || '1';
+        const mood2 = urlParams.get('m2') || '2';
+        const mood3 = urlParams.get('m3') || '3';
+
+        const videoMap = {
+            intro: `${BASE_URL}intro.mp4`,
+            mood_1: `${BASE_URL}mood_1.mp4`,
+            mood_2: `${BASE_URL}mood_2.mp4`,
+            mood_3: `${BASE_URL}mood_3.mp4`,
+            outro: `${BASE_URL}outro.mp4`
+        };
+
+        const sequence = [
+            'intro',
+            `mood_${mood1}`,
+            `mood_${mood2}`,
+            `mood_${mood3}`,
+            'outro'
+        ];
+
+        let currentVideoIndex = 0;
+        const videoPlayer = document.getElementById('videoPlayer');
+        const playerContainer = document.getElementById('playerContainer');
+
+        function playNextVideo() {
+            if (currentVideoIndex >= sequence.length) {
+                showEndScreen();
+                return;
+            }
+
+            const key = sequence[currentVideoIndex];
+            const url = videoMap[key];
+
+            if (!url) {
+                console.error(`Видео не найдено: ${key}`);
+                currentVideoIndex++;
+                playNextVideo();
+                return;
+            }
+
+            videoPlayer.src = url;
+            videoPlayer.play().catch(e => {
+                // Если автоплей заблокирован — показываем кнопку
+                playerContainer.innerHTML = `
+                    <button onclick="document.getElementById('videoPlayer').play(); this.remove();" style="padding: 15px 30px; font-size: 18px; background: #ff5e5b; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        ▶️ Нажми, чтобы начать
+                    </button>
+                    <video id="videoPlayer" playsinline style="width: 100%; max-width: 600px; margin-top: 20px;"></video>
+                `;
+            });
+
+            videoPlayer.addEventListener('ended', () => {
+                currentVideoIndex++;
+                playNextVideo();
+            });
+        }
+
+        function showEndScreen() {
+            playerContainer.innerHTML = `
+                <div style="color: white; text-align: center; padding: 20px;">
+                    <h2>🎬 Твоя неделя завершена!</h2>
+                    <button id="shareBtn">📲 Поделиться</button>
+                    <button id="restartBtn">🔄 Новая неделя</button>
+                </div>
+            `;
+
+            document.getElementById('shareBtn').addEventListener('click', shareResult);
+            document.getElementById('restartBtn').addEventListener('click', () => {
+                window.location.href = 'https://t.me/твой_бот'; // замени позже
+            });
+        }
+
+        function shareResult() {
+            const shareText = `МОЯ НЕДЕЛЯ КАК...\nПн: как телефон с 3% 📱\nВт: как кот на солнце 🐱\nСр: как герой 🎮\n#МояНеделяКак\n${window.location.href}`;
+            if (navigator.share) {
+                navigator.share({ title: 'Моя неделя как...', text: shareText });
+            } else {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert("Скопировано! Вставь в чат или сторис ✅");
+                });
+            }
+        }
+
+        // Стартуем!
+        playNextVideo();
+    </script>
+</body>
+</html>
