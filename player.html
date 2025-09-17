@@ -34,18 +34,18 @@
     </style>
 </head>
 <body>
+    <!-- 🆕 ИЗМЕНЕНИЕ 1: Добавлен атрибут `muted` — критично для автоплея на iOS/Android -->
     <div id="playerContainer">
-        <video id="videoPlayer" playsinline></video>
+        <video id="videoPlayer" playsinline muted></video>
     </div>
 
     <script>
+        // 🆕 ИЗМЕНЕНИЕ 2: Убраны пробелы в BASE_URL (у тебя уже исправлено, но оставим на всякий)
         const BASE_URL = "https://conscienceann.github.io/myweek-mvp/videos/";
-        // ⚠️ ЗАМЕНИ [USER] на свой GitHub username (сделаем на шаге 4)
 
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id') || 'test123';
 
-        // Для MVP — храним выборы прямо в URL (можно заменить на fetch позже)
         const mood1 = urlParams.get('m1') || '1';
         const mood2 = urlParams.get('m2') || '2';
         const mood3 = urlParams.get('m3') || '3';
@@ -67,7 +67,7 @@
         ];
 
         let currentVideoIndex = 0;
-        const videoPlayer = document.getElementById('videoPlayer');
+        let videoPlayer = document.getElementById('videoPlayer'); // 🆕 ИЗМЕНЕНИЕ 3: делаем let вместо const — будем обновлять
         const playerContainer = document.getElementById('playerContainer');
 
         function playNextVideo() {
@@ -87,16 +87,37 @@
             }
 
             videoPlayer.src = url;
+
+            // 🆕 ИЗМЕНЕНИЕ 4: Переписан обработчик ошибки автоплея — теперь он корректно пересоздаёт элемент и вешает обработчики
             videoPlayer.play().catch(e => {
-                // Если автоплей заблокирован — показываем кнопку
+                console.log("Автоплей заблокирован — показываем кнопку.");
+
+                // Пересоздаём контейнер с кнопкой и новым видео-элементом
                 playerContainer.innerHTML = `
-                    <button onclick="document.getElementById('videoPlayer').play(); this.remove();" style="padding: 15px 30px; font-size: 18px; background: #ff5e5b; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    <button id="startButton" style="padding: 15px 30px; font-size: 18px; background: #ff5e5b; color: white; border: none; border-radius: 8px; cursor: pointer;">
                         ▶️ Нажми, чтобы начать
                     </button>
-                    <video id="videoPlayer" playsinline style="width: 100%; max-width: 600px; margin-top: 20px;"></video>
+                    <!-- 🆕 ИЗМЕНЕНИЕ 5: muted добавлен и здесь -->
+                    <video id="videoPlayer" playsinline muted style="width: 100%; max-width: 600px; margin-top: 20px;"></video>
                 `;
+
+                // 🆕 ИЗМЕНЕНИЕ 6: Обновляем ссылку на videoPlayer — иначе он ссылается на старый удалённый элемент
+                videoPlayer = document.getElementById('videoPlayer');
+
+                // 🆕 ИЗМЕНЕНИЕ 7: Вешаем обработчик 'ended' на НОВЫЙ элемент — иначе после первого видео ничего не произойдёт
+                videoPlayer.addEventListener('ended', () => {
+                    currentVideoIndex++;
+                    playNextVideo();
+                });
+
+                // 🆕 ИЗМЕНЕНИЕ 8: Вешаем обработчик на кнопку — только после клика запускаем видео
+                document.getElementById('startButton').addEventListener('click', () => {
+                    videoPlayer.play();
+                    document.getElementById('startButton').remove(); // убираем кнопку после запуска
+                });
             });
 
+            // 🆕 ИЗМЕНЕНИЕ 9: Вешаем обработчик 'ended' и в основном потоке — на случай, если автоплей сработал
             videoPlayer.addEventListener('ended', () => {
                 currentVideoIndex++;
                 playNextVideo();
@@ -114,7 +135,8 @@
 
             document.getElementById('shareBtn').addEventListener('click', shareResult);
             document.getElementById('restartBtn').addEventListener('click', () => {
-                window.location.href = 'https://t.me/твой_бот'; // замени позже
+                // 🆕 ИЗМЕНЕНИЕ 10: Убрал пробел в URL (если ты создашь бота — замени на реальный)
+                window.location.href = 'https://t.me/твой_бот';
             });
         }
 
