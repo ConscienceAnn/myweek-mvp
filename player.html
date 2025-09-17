@@ -14,12 +14,35 @@
             align-items: center;
             min-height: 100vh;
             font-family: Arial, sans-serif;
+            overflow: hidden;
         }
-        #videoPlayer {
-            max-width: 100%;
+        #imageContainer {
+            width: 100%;
+            max-width: 600px;
             height: auto;
             background: #000;
-            display: block;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #currentImage {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #startButton {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #ff5e5b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            position: absolute;
+            z-index: 10;
         }
         #shareBtn, #restartBtn {
             padding: 12px 24px;
@@ -31,26 +54,18 @@
         }
         #shareBtn { background: #ff5e5b; color: white; }
         #restartBtn { background: #4CAF50; color: white; }
-        #startButton {
-            padding: 15px 30px;
-            font-size: 18px;
-            background: #ff5e5b;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
     <div id="playerContainer">
-        <button id="startButton">▶️ Нажми, чтобы начать</button>
-        <video id="videoPlayer" playsinline muted style="width: 100%; max-width: 600px; display: none;"></video>
+        <div id="imageContainer">
+            <img id="currentImage" alt="Твоя неделя">
+            <button id="startButton">▶️ Нажми, чтобы начать</button>
+        </div>
     </div>
 
     <script>
-        const BASE_URL = "https://conscienceann.github.io/myweek-mvp/videos/";
+        const BASE_URL = "https://conscienceann.github.io/myweek-mvp/images/";
 
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id') || 'test123';
@@ -59,12 +74,12 @@
         const mood2 = urlParams.get('m2') || '2';
         const mood3 = urlParams.get('m3') || '3';
 
-        const videoMap = {
-            intro: `${BASE_URL}intro.mp4`,
-            mood_1: `${BASE_URL}mood_1.mp4`,
-            mood_2: `${BASE_URL}mood_2.mp4`,
-            mood_3: `${BASE_URL}mood_3.mp4`,
-            outro: `${BASE_URL}outro.mp4`
+        const imageMap = {
+            intro: `${BASE_URL}intro.jpg`,
+            mood_1: `${BASE_URL}mood_1.jpg`,
+            mood_2: `${BASE_URL}mood_2.jpg`,
+            mood_3: `${BASE_URL}mood_3.jpg`,
+            outro: `${BASE_URL}outro.jpg`
         };
 
         const sequence = [
@@ -75,44 +90,64 @@
             'outro'
         ];
 
-        let currentVideoIndex = 0;
-        const videoPlayer = document.getElementById('videoPlayer');
+        let currentImageIndex = 0;
+        const currentImage = document.getElementById('currentImage');
         const playerContainer = document.getElementById('playerContainer');
+        const imageContainer = document.getElementById('imageContainer');
         const startButton = document.getElementById('startButton');
 
-        function playNextVideo() {
-            if (currentVideoIndex >= sequence.length) {
+        // Длительность показа каждого изображения (в миллисекундах)
+        const DISPLAY_DURATION = 3000; // 3 секунды
+        let imageTimer = null;
+
+        function showNextImage() {
+            if (currentImageIndex >= sequence.length) {
                 showEndScreen();
                 return;
             }
 
-            const key = sequence[currentVideoIndex];
-            const url = videoMap[key];
+            const key = sequence[currentImageIndex];
+            const url = imageMap[key];
 
             if (!url) {
-                console.error(`Видео не найдено: ${key}`);
-                currentVideoIndex++;
-                playNextVideo();
+                console.error(`Изображение не найдено: ${key}`);
+                currentImageIndex++;
+                showNextImage();
                 return;
             }
 
-            videoPlayer.src = url;
-            videoPlayer.style.display = 'block';
-
-            videoPlayer.addEventListener('ended', handleVideoEnd, { once: true });
-
-            videoPlayer.play().catch(error => {
-                console.error("Ошибка воспроизведения:", error);
-            });
-        }
-
-        function handleVideoEnd() {
-            currentVideoIndex++;
-            playNextVideo();
+            // Плавное появление изображения
+            currentImage.style.opacity = '0';
+            
+            // Загружаем изображение
+            const img = new Image();
+            img.onload = function() {
+                currentImage.src = url;
+                currentImage.style.opacity = '1';
+                
+                // Устанавливаем таймер для следующего изображения
+                imageTimer = setTimeout(() => {
+                    currentImageIndex++;
+                    showNextImage();
+                }, DISPLAY_DURATION);
+            };
+            
+            img.onerror = function() {
+                console.error(`Ошибка загрузки изображения: ${url}`);
+                currentImageIndex++;
+                showNextImage();
+            };
+            
+            img.src = url;
         }
 
         function showEndScreen() {
-            playerContainer.innerHTML = `
+            // Очищаем таймер, если он существует
+            if (imageTimer) {
+                clearTimeout(imageTimer);
+            }
+            
+            imageContainer.innerHTML = `
                 <div style="color: white; text-align: center; padding: 20px;">
                     <h2>🎬 Твоя неделя завершена!</h2>
                     <button id="shareBtn">📲 Поделиться</button>
@@ -141,7 +176,7 @@
 
         startButton.addEventListener('click', () => {
             startButton.style.display = 'none';
-            playNextVideo();
+            showNextImage();
         });
     </script>
 </body>
