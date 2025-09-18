@@ -92,76 +92,94 @@
             }
         }
         
-        /* Glitch + RGB Split эффект */
-        .glitch-container {
+        /* Glitch эффект - упрощенная версия */
+        .glitch-effect {
             position: relative;
-            width: 100%;
-            height: auto;
-            overflow: hidden;
         }
         
-        .glitch-layer {
+        .glitch-effect::before,
+        .glitch-effect::after {
+            content: attr(data-glitch);
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            mix-blend-mode: lighten;
+            background: black;
+            background: url('');
+            background-size: cover;
+            clip: rect(0, 0, 0, 0);
         }
         
-        .glitch-red {
-            filter: hue-rotate(0deg) saturate(300%);
+        .glitch-effect::before {
             left: 2px;
-            opacity: 0.8;
+            text-shadow: -2px 0 red;
+            animation: glitch-anim-1 0.4s linear infinite;
         }
         
-        .glitch-blue {
-            filter: hue-rotate(240deg) saturate(300%);
+        .glitch-effect::after {
             left: -2px;
-            opacity: 0.8;
+            text-shadow: 2px 0 blue;
+            animation: glitch-anim-2 0.4s linear infinite;
         }
         
-        .glitch-main {
-            position: relative;
-            z-index: 1;
+        @keyframes glitch-anim-1 {
+            0% { clip: rect(42px, 9999px, 44px, 0); }
+            5% { clip: rect(12px, 9999px, 59px, 0); }
+            10% { clip: rect(48px, 9999px, 29px, 0); }
+            15% { clip: rect(42px, 9999px, 73px, 0); }
+            20% { clip: rect(63px, 9999px, 27px, 0); }
+            25% { clip: rect(34px, 9999px, 55px, 0); }
+            30% { clip: rect(86px, 9999px, 73px, 0); }
+            35% { clip: rect(20px, 9999px, 20px, 0); }
+            40% { clip: rect(27px, 9999px, 7px, 0); }
+            45% { clip: rect(98px, 9999px, 5px, 0); }
+            50% { clip: rect(36px, 9999px, 58px, 0); }
+            55% { clip: rect(27px, 9999px, 71px, 0); }
+            60% { clip: rect(56px, 9999px, 28px, 0); }
+            65% { clip: rect(5px, 9999px, 85px, 0); }
+            70% { clip: rect(83px, 9999px, 81px, 0); }
+            75% { clip: rect(36px, 9999px, 58px, 0); }
+            80% { clip: rect(20px, 9999px, 21px, 0); }
+            85% { clip: rect(27px, 9999px, 5px, 0); }
+            90% { clip: rect(95px, 9999px, 9px, 0); }
+            95% { clip: rect(37px, 9999px, 58px, 0); }
+            100% { clip: rect(27px, 9999px, 71px, 0); }
         }
         
-        .glitch-active .glitch-main {
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(65px, 9999px, 66px, 0); }
+            5% { clip: rect(52px, 9999px, 19px, 0); }
+            10% { clip: rect(79px, 9999px, 59px, 0); }
+            15% { clip: rect(55px, 9999px, 33px, 0); }
+            20% { clip: rect(87px, 9999px, 7px, 0); }
+            25% { clip: rect(14px, 9999px, 75px, 0); }
+            30% { clip: rect(26px, 9999px, 53px, 0); }
+            35% { clip: rect(50px, 9999px, 20px, 0); }
+            40% { clip: rect(67px, 9999px, 7px, 0); }
+            45% { clip: rect(97px, 9999px, 5px, 0); }
+            50% { clip: rect(16px, 9999px, 88px, 0); }
+            55% { clip: rect(7px, 9999px, 31px, 0); }
+            60% { clip: rect(26px, 9999px, 8px, 0); }
+            65% { clip: rect(5px, 9999px, 55px, 0); }
+            70% { clip: rect(3px, 9999px, 1px, 0); }
+            75% { clip: rect(36px, 9999px, 58px, 0); }
+            80% { clip: rect(70px, 9999px, 51px, 0); }
+            85% { clip: rect(27px, 9999px, 5px, 0); }
+            90% { clip: rect(95px, 9999px, 9px, 0); }
+            95% { clip: rect(37px, 9999px, 58px, 0); }
+            100% { clip: rect(7px, 9999px, 1px, 0); }
+        }
+        
+        .glitch-active {
             animation: glitch-main 0.4s linear forwards;
-        }
-        
-        .glitch-active .glitch-red,
-        .glitch-active .glitch-blue {
-            animation: glitch-color 0.4s linear infinite;
-            display: block;
         }
         
         @keyframes glitch-main {
             0%, 100% { transform: translate(0); filter: none; }
-            10% { transform: translate(-2px, 2px); filter: contrast(150%) brightness(120%); }
-            20% { transform: translate(2px, -2px); filter: contrast(150%) brightness(120%); }
-            30% { transform: translate(-2px, -2px); filter: contrast(150%) brightness(120%); }
-            40% { transform: translate(2px, 2px); filter: contrast(150%) brightness(120%); }
-            50% { transform: translate(-2px, 0); filter: contrast(150%) brightness(120%); }
-            60% { transform: translate(2px, 0); filter: contrast(150%) brightness(120%); }
-            70% { transform: translate(0, 2px); filter: contrast(150%) brightness(120%); }
-            80% { transform: translate(0, -2px); filter: contrast(150%) brightness(120%); }
-            90% { transform: translate(0, 0); filter: contrast(150%) brightness(120%); }
-        }
-        
-        @keyframes glitch-color {
-            0% { clip-path: inset(10% 0 90% 0); }
-            10% { clip-path: inset(20% 0 80% 0); }
-            20% { clip-path: inset(30% 0 70% 0); }
-            30% { clip-path: inset(40% 0 60% 0); }
-            40% { clip-path: inset(50% 0 50% 0); }
-            50% { clip-path: inset(60% 0 40% 0); }
-            60% { clip-path: inset(70% 0 30% 0); }
-            70% { clip-path: inset(80% 0 20% 0); }
-            80% { clip-path: inset(90% 0 10% 0); }
-            90% { clip-path: inset(100% 0 0 0); }
-            100% { clip-path: inset(0 0 100% 0); }
+            25% { transform: translate(-2px, 2px); filter: contrast(150%) brightness(120%); }
+            50% { transform: translate(2px, -2px); filter: contrast(150%) brightness(120%); }
+            75% { transform: translate(-2px, -2px); filter: contrast(150%) brightness(120%); }
         }
         
         #startButton {
@@ -190,11 +208,7 @@
 <body>
     <div id="playerContainer">
         <div id="imageContainer">
-            <div id="glitchWrapper" class="glitch-container">
-                <img id="currentImage" class="image-slide glitch-main" alt="Твоя неделя">
-                <img class="image-slide glitch-layer glitch-red" style="display: none;" alt="red layer">
-                <img class="image-slide glitch-layer glitch-blue" style="display: none;" alt="blue layer">
-            </div>
+            <img id="currentImage" class="image-slide" alt="Твоя неделя">
             <button id="startButton">▶️ Нажми, чтобы начать</button>
         </div>
     </div>
@@ -227,11 +241,8 @@
 
         let currentImageIndex = 0;
         const imageContainer = document.getElementById('imageContainer');
-        const glitchWrapper = document.getElementById('glitchWrapper');
         const startButton = document.getElementById('startButton');
         const currentImage = document.getElementById('currentImage');
-        const redLayer = document.querySelector('.glitch-red');
-        const blueLayer = document.querySelector('.glitch-blue');
 
         // Длительность показа каждого изображения (в миллисекундах)
         const DISPLAY_DURATION = 3000; // 3 секунды
@@ -253,78 +264,52 @@
                 return;
             }
 
+            // Находим текущее активное изображение
+            const currentActive = document.querySelector('.image-slide.active');
+            
+            if (currentActive) {
+                // Добавляем класс для анимации выхода
+                currentActive.classList.remove('active');
+                currentActive.classList.add('outgoing');
+                
+                // Удаляем его после анимации
+                setTimeout(() => {
+                    if (currentActive.parentNode) {
+                        currentActive.remove();
+                    }
+                }, 800);
+            }
+            
             // Создаем новый элемент изображения
             const newImage = document.createElement('img');
-            newImage.className = 'image-slide glitch-main';
+            newImage.className = 'image-slide';
             newImage.alt = 'Твоя неделя';
-            
-            // Создаем контейнер для glitch эффекта
-            const newGlitchWrapper = document.createElement('div');
-            newGlitchWrapper.className = 'glitch-container';
-            
-            // Создаем слои для glitch эффекта
-            const newRedLayer = document.createElement('img');
-            newRedLayer.className = 'image-slide glitch-layer glitch-red';
-            newRedLayer.style.display = 'none';
-            
-            const newBlueLayer = document.createElement('img');
-            newBlueLayer.className = 'image-slide glitch-layer glitch-blue';
-            newBlueLayer.style.display = 'none';
             
             // Загружаем изображение
             newImage.onload = function() {
-                // Находим текущий активный контейнер
-                const currentActiveWrapper = document.querySelector('.glitch-container.active');
-                
-                if (currentActiveWrapper) {
-                    // Добавляем класс для анимации выхода
-                    currentActiveWrapper.classList.remove('active');
-                    currentActiveWrapper.classList.add('outgoing');
-                    
-                    // Удаляем его после анимации
-                    setTimeout(() => {
-                        if (currentActiveWrapper.parentNode) {
-                            currentActiveWrapper.remove();
-                        }
-                    }, 800);
-                }
-                
-                // Устанавливаем src для всех слоев
-                newRedLayer.src = url;
-                newBlueLayer.src = url;
-                
-                // Собираем контейнер
-                newGlitchWrapper.appendChild(newImage);
-                newGlitchWrapper.appendChild(newRedLayer);
-                newGlitchWrapper.appendChild(newBlueLayer);
-                
-                // Добавляем контейнер в DOM
-                imageContainer.appendChild(newGlitchWrapper);
+                // Добавляем новое изображение
+                imageContainer.appendChild(newImage);
                 
                 // Запускаем анимацию входа с небольшой задержкой для плавности
                 setTimeout(() => {
-                    newGlitchWrapper.classList.add('incoming');
+                    newImage.classList.add('incoming');
                     
                     // После завершения анимации входа делаем его активным
                     setTimeout(() => {
-                        newGlitchWrapper.classList.remove('incoming');
-                        newGlitchWrapper.classList.add('active');
+                        newImage.classList.remove('incoming');
+                        newImage.classList.add('active');
                         
                         // Если это второй кадр (индекс 2 в последовательности, т.к. индексация с 0, и первый элемент - intro)
                         if (currentImageIndex === 2) {
                             // Добавляем эффект glitch через 1 секунду после появления изображения
                             setTimeout(() => {
-                                // Показываем слои glitch
-                                newRedLayer.style.display = 'block';
-                                newBlueLayer.style.display = 'block';
-                                // Добавляем класс для анимации
-                                newGlitchWrapper.classList.add('glitch-active');
+                                // Применяем glitch эффект
+                                newImage.style.backgroundImage = `url(${url})`;
+                                newImage.classList.add('glitch-effect', 'glitch-active');
                                 
                                 // Через 0.4 секунды убираем эффект и переходим к следующему изображению
                                 setTimeout(() => {
-                                    newGlitchWrapper.classList.remove('glitch-active');
-                                    newRedLayer.style.display = 'none';
-                                    newBlueLayer.style.display = 'none';
+                                    newImage.classList.remove('glitch-active');
                                     currentImageIndex++;
                                     showNextImage();
                                 }, 400);
@@ -355,9 +340,9 @@
                 clearTimeout(imageTimer);
             }
             
-            // Удаляем все контейнеры
-            const containers = document.querySelectorAll('.glitch-container');
-            containers.forEach(container => container.remove());
+            // Удаляем все изображения
+            const images = document.querySelectorAll('.image-slide');
+            images.forEach(img => img.remove());
             
             imageContainer.innerHTML = `
                 <div style="color: white; text-align: center; padding: 20px;">
