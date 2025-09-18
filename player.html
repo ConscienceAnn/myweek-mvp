@@ -25,13 +25,71 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
-        #currentImage {
+        .image-slide {
+            position: absolute;
             width: 100%;
             height: auto;
             object-fit: contain;
             opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            transition: none;
+        }
+        .active {
+            opacity: 1;
+            z-index: 2;
+        }
+        .incoming {
+            animation: windSwipeIn 1s ease-out forwards;
+            z-index: 3;
+        }
+        .outgoing {
+            animation: windSwipeOut 0.8s ease-in forwards;
+            z-index: 1;
+        }
+        @keyframes windSwipeIn {
+            0% {
+                transform: translateX(100%) rotate(5deg);
+                opacity: 0;
+                filter: blur(10px);
+            }
+            30% {
+                transform: translateX(30%) rotate(2deg);
+                opacity: 0.7;
+                filter: blur(5px);
+            }
+            60% {
+                transform: translateX(-10%) rotate(-1deg);
+                opacity: 1;
+                filter: blur(2px);
+            }
+            100% {
+                transform: translateX(0) rotate(0);
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+        @keyframes windSwipeOut {
+            0% {
+                transform: translateX(0) rotate(0);
+                opacity: 1;
+                filter: blur(0);
+            }
+            40% {
+                transform: translateX(-20%) rotate(-2deg);
+                opacity: 0.7;
+                filter: blur(3px);
+            }
+            70% {
+                transform: translateX(-60%) rotate(-5deg);
+                opacity: 0.3;
+                filter: blur(6px);
+            }
+            100% {
+                transform: translateX(-100%) rotate(-8deg);
+                opacity: 0;
+                filter: blur(10px);
+            }
         }
         #startButton {
             padding: 15px 30px;
@@ -59,7 +117,7 @@
 <body>
     <div id="playerContainer">
         <div id="imageContainer">
-            <img id="currentImage" alt="Твоя неделя">
+            <img id="currentImage" class="image-slide" alt="Твоя неделя">
             <button id="startButton">▶️ Нажми, чтобы начать</button>
         </div>
     </div>
@@ -91,8 +149,6 @@
         ];
 
         let currentImageIndex = 0;
-        const currentImage = document.getElementById('currentImage');
-        const playerContainer = document.getElementById('playerContainer');
         const imageContainer = document.getElementById('imageContainer');
         const startButton = document.getElementById('startButton');
 
@@ -116,29 +172,57 @@
                 return;
             }
 
-            // Плавное появление изображения
-            currentImage.style.opacity = '0';
+            // Создаем новый элемент изображения
+            const newImage = document.createElement('img');
+            newImage.className = 'image-slide';
+            newImage.alt = 'Твоя неделя';
             
             // Загружаем изображение
-            const img = new Image();
-            img.onload = function() {
-                currentImage.src = url;
-                currentImage.style.opacity = '1';
+            newImage.onload = function() {
+                // Находим текущее активное изображение
+                const currentActive = document.querySelector('.image-slide.active');
                 
-                // Устанавливаем таймер для следующего изображения
-                imageTimer = setTimeout(() => {
-                    currentImageIndex++;
-                    showNextImage();
-                }, DISPLAY_DURATION);
+                if (currentActive) {
+                    // Добавляем класс для анимации выхода
+                    currentActive.classList.remove('active');
+                    currentActive.classList.add('outgoing');
+                    
+                    // Удаляем его после анимации
+                    setTimeout(() => {
+                        if (currentActive.parentNode) {
+                            currentActive.remove();
+                        }
+                    }, 800);
+                }
+                
+                // Добавляем новое изображение
+                imageContainer.appendChild(newImage);
+                
+                // Запускаем анимацию входа с небольшой задержкой для плавности
+                setTimeout(() => {
+                    newImage.classList.add('incoming');
+                    
+                    // После завершения анимации входа делаем его активным
+                    setTimeout(() => {
+                        newImage.classList.remove('incoming');
+                        newImage.classList.add('active');
+                        
+                        // Устанавливаем таймер для следующего изображения
+                        imageTimer = setTimeout(() => {
+                            currentImageIndex++;
+                            showNextImage();
+                        }, DISPLAY_DURATION);
+                    }, 1000);
+                }, 50);
             };
             
-            img.onerror = function() {
+            newImage.onerror = function() {
                 console.error(`Ошибка загрузки изображения: ${url}`);
                 currentImageIndex++;
                 showNextImage();
             };
             
-            img.src = url;
+            newImage.src = url;
         }
 
         function showEndScreen() {
@@ -146,6 +230,10 @@
             if (imageTimer) {
                 clearTimeout(imageTimer);
             }
+            
+            // Удаляем все изображения
+            const images = document.querySelectorAll('.image-slide');
+            images.forEach(img => img.remove());
             
             imageContainer.innerHTML = `
                 <div style="color: white; text-align: center; padding: 20px;">
