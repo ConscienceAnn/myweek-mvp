@@ -91,6 +91,131 @@
                 filter: blur(10px);
             }
         }
+        
+        /* Glitch + RGB Split эффект */
+        .glitch-effect {
+            position: relative;
+            animation: glitch 0.4s linear forwards;
+        }
+        
+        @keyframes glitch {
+            0% {
+                transform: translate(0);
+            }
+            10% {
+                transform: translate(-2px, 2px);
+                filter: contrast(150%) brightness(120%);
+            }
+            20% {
+                transform: translate(2px, -2px);
+                filter: contrast(150%) brightness(120%);
+            }
+            30% {
+                transform: translate(-2px, -2px);
+                filter: contrast(150%) brightness(120%);
+            }
+            40% {
+                transform: translate(2px, 2px);
+                filter: contrast(150%) brightness(120%);
+            }
+            50% {
+                transform: translate(-2px, 0);
+                filter: contrast(150%) brightness(120%);
+            }
+            60% {
+                transform: translate(2px, 0);
+                filter: contrast(150%) brightness(120%);
+            }
+            70% {
+                transform: translate(0, 2px);
+                filter: contrast(150%) brightness(120%);
+            }
+            80% {
+                transform: translate(0, -2px);
+                filter: contrast(150%) brightness(120%);
+            }
+            90% {
+                transform: translate(0, 0);
+                filter: contrast(150%) brightness(120%);
+            }
+            100% {
+                transform: translate(0);
+                filter: none;
+            }
+        }
+        
+        .glitch-effect::before,
+        .glitch-effect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            background-position: center;
+            clip-path: inset(0 0 0 0);
+            animation: glitch-anim 0.4s linear infinite;
+        }
+        
+        .glitch-effect::before {
+            left: 2px;
+            animation: glitch-anim-2 0.4s linear infinite;
+            filter: hue-rotate(0deg) saturate(300%);
+            mix-blend-mode: lighten;
+            opacity: 0.8;
+        }
+        
+        .glitch-effect::after {
+            left: -2px;
+            animation: glitch-anim-3 0.4s linear infinite;
+            filter: hue-rotate(120deg) saturate(300%);
+            mix-blend-mode: darken;
+            opacity: 0.8;
+        }
+        
+        @keyframes glitch-anim {
+            0% { clip-path: inset(10% 0 90% 0); }
+            10% { clip-path: inset(20% 0 80% 0); }
+            20% { clip-path: inset(30% 0 70% 0); }
+            30% { clip-path: inset(40% 0 60% 0); }
+            40% { clip-path: inset(50% 0 50% 0); }
+            50% { clip-path: inset(60% 0 40% 0); }
+            60% { clip-path: inset(70% 0 30% 0); }
+            70% { clip-path: inset(80% 0 20% 0); }
+            80% { clip-path: inset(90% 0 10% 0); }
+            90% { clip-path: inset(100% 0 0 0); }
+            100% { clip-path: inset(0 0 100% 0); }
+        }
+        
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(90% 0 10% 0); }
+            10% { clip-path: inset(80% 0 20% 0); }
+            20% { clip-path: inset(70% 0 30% 0); }
+            30% { clip-path: inset(60% 0 40% 0); }
+            40% { clip-path: inset(50% 0 50% 0); }
+            50% { clip-path: inset(40% 0 60% 0); }
+            60% { clip-path: inset(30% 0 70% 0); }
+            70% { clip-path: inset(20% 0 80% 0); }
+            80% { clip-path: inset(10% 0 90% 0); }
+            90% { clip-path: inset(0 0 100% 0); }
+            100% { clip-path: inset(100% 0 0 0); }
+        }
+        
+        @keyframes glitch-anim-3 {
+            0% { clip-path: inset(50% 0 50% 0); }
+            10% { clip-path: inset(60% 0 40% 0); }
+            20% { clip-path: inset(70% 0 30% 0); }
+            30% { clip-path: inset(80% 0 20% 0); }
+            40% { clip-path: inset(90% 0 10% 0); }
+            50% { clip-path: inset(100% 0 0 0); }
+            60% { clip-path: inset(0 0 100% 0); }
+            70% { clip-path: inset(10% 0 90% 0); }
+            80% { clip-path: inset(20% 0 80% 0); }
+            90% { clip-path: inset(30% 0 70% 0); }
+            100% { clip-path: inset(40% 0 60% 0); }
+        }
+        
         #startButton {
             padding: 15px 30px;
             font-size: 18px;
@@ -207,11 +332,26 @@
                         newImage.classList.remove('incoming');
                         newImage.classList.add('active');
                         
-                        // Устанавливаем таймер для следующего изображения
-                        imageTimer = setTimeout(() => {
-                            currentImageIndex++;
-                            showNextImage();
-                        }, DISPLAY_DURATION);
+                        // Если это второй кадр (индекс 2 в последовательности, т.к. индексация с 0, и первый элемент - intro)
+                        if (currentImageIndex === 2) {
+                            // Добавляем эффект glitch через 1 секунду после появления изображения
+                            setTimeout(() => {
+                                newImage.classList.add('glitch-effect');
+                                
+                                // Через 0.4 секунды убираем эффект и переходим к следующему изображению
+                                setTimeout(() => {
+                                    newImage.classList.remove('glitch-effect');
+                                    currentImageIndex++;
+                                    showNextImage();
+                                }, 400);
+                            }, 1000); // Задержка перед началом эффекта
+                        } else {
+                            // Устанавливаем таймер для следующего изображения
+                            imageTimer = setTimeout(() => {
+                                currentImageIndex++;
+                                showNextImage();
+                            }, DISPLAY_DURATION);
+                        }
                     }, 1000);
                 }, 50);
             };
